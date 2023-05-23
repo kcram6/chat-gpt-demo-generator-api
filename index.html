@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chat API</title>
+  </head>
+  <body>
+    <main>
+        <h1>Chat GPT API</h1> 
+        <form action="">
+            <div>
+                <label style="display: block;">Company Name </label>
+                <input type="text" name="companyName" id="companyName"/>
+            </div>
+
+            <label style="display: block;">Company Type <small>ex: General Contractor</small></label>
+            <input type="text" name="type" id="type"/>
+            <button type="submit">Send</button>
+        </form> 
+        <div id="chat-log">
+
+        </div>
+    </main>
+	<script>
+        let messages = [];
+        const chatLog = document.getElementById("chat-log");
+        const type = document.getElementById("type");
+        const name = document.getElementById("companyName");
+        const form = document.querySelector("form");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const messageText = type.value;
+            const nameText = name.value;
+
+            const companyServices = {
+                "role": "user",
+                "content": `What are some main services of ${messageText}. Write in 1st person format and paragraph style and use ${nameText} as the name of the company with the services.`
+            }
+            messages.push(companyServices);
+
+            // clear all fields
+            type.value = "";
+            name.value = "";
+
+
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            messageElement.classList.add("message--sent");
+            messageElement.innerHTML = `
+                <div class="message__text">${messageText}</div>
+            `;
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            fetch("http://localhost:3000",  {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    messages,
+                    imageReq: "Baby Elephant with a dog toy and a purple hat"
+                })
+                
+            })
+            .then (res => res.json())
+            .then(data => {
+                // let imageURL = `${data.responseImage}`;
+                // let newAssistantMessage = {
+                //     "role": "assistant",
+                //     "content": `${data.completion.content}`
+                // };
+                // messages.push(newAssistantMessage);
+
+                const imgElement = document.createElement("div");
+                imgElement.innerHTML = `
+                    <div class="tests">${data.test}</div>
+                `;
+                chatLog.appendChild(imgElement);
+
+
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message");
+                messageElement.classList.add("message--sent");
+                messageElement.innerHTML = `
+                    <div class="message__text">${data.completion.content}</div>
+                `;
+                chatLog.appendChild(messageElement);
+                chatLog.scrollTop = chatLog.scrollHeight; 
+            })
+            
+
+        })
+    </script>
+  </body>
+</html>
